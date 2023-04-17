@@ -148,7 +148,8 @@ export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => (
       authorize: async (credentials) => {
         try {
           const siwe = new SiweMessage(JSON.parse(credentials?.message as string ?? "{}") as Partial<SiweMessage>);
-          const nonce = await getCsrfToken({ req });
+          // Fix for next-auth@4.21.1
+          const nonce = await getCsrfToken({ req: { headers: req?.headers } });
           const fields = await siwe.validate(credentials?.signature || "")
 
           if (fields.nonce !== nonce) {
