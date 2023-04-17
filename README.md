@@ -8,11 +8,23 @@ An implementation of [T3 Stack](https://create.t3.gg/) with [Sign-In With Ethere
 
 📘 Full walkthrough article on how to [Combine Sign-In With Ethereum With Create-T3-App](https://codingwithmanny.medium.com/combine-sign-in-with-ethereum-with-create-t3-app-8f54604caeeb).
 
+<a href="https://codingwithmanny.medium.com/combine-sign-in-with-ethereum-with-create-t3-app-8f54604caeeb">![Combine Sign-In With Ethereum With Create-T3-App](README/t3-siwe-medium.jpg)</a>
+
 ---
 
 ## Requirement
 
 - NVM or Node `v18.15.0`
+
+---
+
+## next-auth@4.21.1 Fix
+
+With the latest version of `next-auth@4.21.1` it drops the headers which doesn't allow the nonce to be read from the csrf cookie.
+
+The solution to this can be found in this branch:
+
+[fix/next-auth-4.21.1](https://github.com/codingwithmanny/t3-app-siwe/tree/fix/next-auth-4.21.1)
 
 ---
 
