@@ -1,7 +1,11 @@
 // Imports
 // ========================================================
 import { type GetServerSidePropsContext } from "next";
-import { getServerSession, type NextAuthOptions, type DefaultSession } from "next-auth";
+import {
+  getServerSession,
+  type NextAuthOptions,
+  type DefaultSession,
+} from "next-auth";
 import { prisma } from "~/server/db";
 // SIWE Integration
 import type { CtxOrReq } from "next-auth/client/_utils";
@@ -40,16 +44,19 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
-export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => ({
+export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({
+  req,
+}) => ({
   callbacks: {
     // token.sub will refer to the id of the wallet address
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub
-      },
-    } as Session & { user: { id: string; }}),
+    session: ({ session, token }) =>
+      ({
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub,
+        },
+      } as Session & { user: { id: string } }),
     // OTHER CALLBACKS to take advantage of but not needed
     // signIn: async (params: { // Used to control if a user is allowed to sign in
     //   user: User | AdapterUser
@@ -127,9 +134,9 @@ export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => (
   providers: [
     CredentialsProvider({
       // ! Don't add this
-      // - it will assume more than one auth provider 
+      // - it will assume more than one auth provider
       // - and redirect to a sign-in page meant for oauth
-      // - id: 'siwe', 
+      // - id: 'siwe',
       name: "Ethereum",
       type: "credentials", // default for Credentials
       // Default values if it was a form
@@ -147,26 +154,36 @@ export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => (
       },
       authorize: async (credentials) => {
         try {
-          const siwe = new SiweMessage(JSON.parse(credentials?.message as string ?? "{}") as Partial<SiweMessage>);
+          const siwe = new SiweMessage(
+            JSON.parse(
+              (credentials?.message as string) ?? "{}"
+            ) as Partial<SiweMessage>
+          );
           const nonce = await getCsrfToken({ req });
-          const fields = await siwe.validate(credentials?.signature || "")
 
-          if (fields.nonce !== nonce) {
-            return null;
+          const verified = await siwe.verify({
+            signature: credentials?.signature || "",
+            nonce,
+          });
+
+          if (!verified.success) {
+            throw new Error("Verification failed");
           }
+
+          const { data: fields } = verified;
 
           // Check if user exists
           let user = await prisma.user.findUnique({
             where: {
-              address: fields.address
-            }
+              address: fields.address,
+            },
           });
           // Create new user if doesn't exist
           if (!user) {
             user = await prisma.user.create({
               data: {
-                address: fields.address
-              }
+                address: fields.address,
+              },
             });
             // create account
             await prisma.account.create({
@@ -174,15 +191,15 @@ export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => (
                 userId: user.id,
                 type: "credentials",
                 provider: "Ethereum",
-                providerAccountId: fields.address
-              }
+                providerAccountId: fields.address,
+              },
             });
           }
 
           return {
             // Pass user id instead of address
             // id: fields.address
-            id: user.id
+            id: user.id,
           };
         } catch (error) {
           // Uncomment or add logging if needed
@@ -190,7 +207,7 @@ export const authOptions: (ctxReq: CtxOrReq) => NextAuthOptions = ({ req }) => (
           return null;
         }
       },
-    })
+    }),
     /**
      * ...add more providers here.
      *
