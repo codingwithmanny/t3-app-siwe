@@ -6,14 +6,15 @@ import { SessionProvider } from "next-auth/react";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
 // SIWE Integration
-import { WagmiConfig, createConfig, configureChains, mainnet } from "wagmi";
+import { WagmiConfig, createConfig, configureChains } from "wagmi";
+import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
 // Config
 // ========================================================
 
 const { publicClient, webSocketPublicClient } = configureChains(
-  [mainnet],
+  [mainnet, polygon, optimism, arbitrum],
   [publicProvider()]
 );
 
