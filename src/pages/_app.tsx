@@ -6,26 +6,26 @@ import { SessionProvider } from "next-auth/react";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
 // SIWE Integration
-import { WagmiConfig, createClient, configureChains } from "wagmi";
+import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
 // Config
 // ========================================================
-/**
- * Configure chains supported
- */
-const { provider } = configureChains(
+
+const { publicClient, webSocketPublicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum],
   [publicProvider()]
 );
 
 /**
- * Configure client with providers and allow for auto wallet connection
+ * Configure publicProvider and allow for auto wallet connection
  */
-const client = createClient({
+
+const config = createConfig({
   autoConnect: true,
-  provider,
+  publicClient,
+  webSocketPublicClient,
 });
 
 // App Wrapper Component
@@ -35,7 +35,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <WagmiConfig client={client}>
+    <WagmiConfig config={config}>
       <SessionProvider session={session}>
         <Component {...pageProps} />
       </SessionProvider>
