@@ -23,9 +23,10 @@
     "next-auth": "^4.22.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "siwe": "^1.1.6",
+    "siwe": "^2.1.4",
     "superjson": "1.12.2",
-    "wagmi": "^0.12.10",
+    "viem": "^0.3.37",
+    "wagmi": "^1.0.8",
     "zod": "^3.21.4"
   },
   "devDependencies": {
